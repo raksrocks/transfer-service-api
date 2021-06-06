@@ -3,6 +3,8 @@
  */
 package com.assessment.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,11 +32,11 @@ public class XferServiceTest {
 	
 	@Test
 	public void givenValidTransactionBeanShouldReturnSuccessfulResponse() {
-		
+		assertThat(service.trasnfer(new Transaction("1001", "1002", 10.0)).getCode()).isEqualTo(201);
 	}
 
 	@Test
 	public void givenInvalidTransactionBeanShouldReturnFailureResponse() {
-		
+		assertThat(service.trasnfer(new Transaction("1001", "1008", 10.0)).getCode()).isEqualTo(400);
 	}
 }

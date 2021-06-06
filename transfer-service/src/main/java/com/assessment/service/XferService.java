@@ -38,6 +38,8 @@ public class XferService {
 		try {		
 		
 			Account source = accRepo.findByNumber(txn.getSourceNumber());
+			
+			//Validations
 			if(null == source) {
 				resp.setCode(400);
 				resp.setMessage("Failed to create transaction");
@@ -48,6 +50,11 @@ public class XferService {
 				resp.setMessage("Failed to create transaction");
 				resp.setDetails("Source Account doesn't have sufficient funds");
 				return resp;
+			}else if(txn.getAmount()<0) {
+				resp.setCode(400);
+				resp.setMessage("Failed to create transaction");
+				resp.setDetails("Amount to be transferred should be positive");
+				return resp;
 			}
 			
 			Account dest = accRepo.findByNumber(txn.getDestNumber());
@@ -56,18 +63,26 @@ public class XferService {
 				resp.setMessage("Failed to create transaction");
 				resp.setDetails("Destination Account number is invalid");
 				return resp;
+			}else if(dest.getNumber().equals(source.getNumber())){
+				resp.setCode(400);
+				resp.setMessage("Failed to create transaction");
+				resp.setDetails("Source and Destination Account numbers should not be same");
+				return resp;
 			}
 			
-			source.setBalance(source.getBalance()+txn.getAmount());
-			dest.setBalance(dest.getBalance()-txn.getAmount());
+			source.setBalance(source.getBalance()-txn.getAmount());
+			dest.setBalance(dest.getBalance()+txn.getAmount());
 			source = accRepo.save(source);
 			dest = accRepo.save(dest);
 			
 			txn = txnRepo.save(txn);
 			
 			resp.setCode(201);
-			resp.setMessage("Transaction successful");
-			resp.setDetails(txn.toString()+"\n"+source.toString()+"\n"+dest.toString());
+			resp.setMessage("Transaction successfully created");
+			//resp.setDetails(txn.toString()+"  "+source.toString()+" "+dest.toString());
+			resp.setSource(source);
+			resp.setDest(dest);
+			resp.setTxn(txn);
 			
 			return resp;
 		}catch (Exception e) {
